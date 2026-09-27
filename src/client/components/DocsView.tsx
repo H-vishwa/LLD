@@ -77,6 +77,34 @@ export const DocsView: React.FC<DocsViewProps> = ({ onBack }) => {
                 </p>
               </div>
             </div>
+
+            <div style={{ marginTop: '2rem', borderTop: '1px solid var(--border-subtle)', paddingTop: '1.5rem' }}>
+              <h3 style={{ fontSize: '1.25rem', marginBottom: '0.75rem', color: '#ffffff' }}>The Two Simple Change Tests</h3>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
+                <div style={{ background: 'rgba(99, 102, 241, 0.05)', padding: '1rem', borderRadius: 'var(--radius-md)', border: '1px solid rgba(99, 102, 241, 0.2)' }}>
+                  <div style={{ fontWeight: 600, color: '#a5b4fc', fontSize: '0.9rem', marginBottom: '0.35rem' }}>Change Test A: Text &rarr; Class Diagrams</div>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                    <strong>Domain Model Impact: ZERO.</strong> The Submission entity abstracts DesignBlocks and Relationships. A diagram parser (PlantUML or visual canvas) simply emits into this exact model without touching Attempt, Problem, or Evaluators.
+                  </p>
+                </div>
+
+                <div style={{ background: 'rgba(16, 185, 129, 0.05)', padding: '1rem', borderRadius: 'var(--radius-md)', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
+                  <div style={{ fontWeight: 600, color: '#34d399', fontSize: '0.9rem', marginBottom: '0.35rem' }}>Change Test B: Adding Human Review / Linters</div>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                    <strong>Practice Flow Impact: ZERO.</strong> Thanks to the Strategy Pattern, a HumanReviewEvaluator or LinterEvaluator implements IEvaluator and plugs into CompositeEvaluator without altering queue, controllers, or storage.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div style={{ marginTop: '1.5rem', background: 'rgba(255, 255, 255, 0.02)', padding: '1rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
+              <div style={{ fontWeight: 600, color: '#f8fafc', fontSize: '0.88rem', marginBottom: '0.35rem' }}>
+                Practical Scaling: What component to separate first when growing?
+              </div>
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: '1.5' }}>
+                <strong>The EvaluationQueue Worker</strong>: Decouple the async evaluation queue into an independent background worker (e.g., Redis BullMQ + AWS Lambda/Cloud Run). Web API endpoints remain lightweight and instant (&lt;50ms), while compute-heavy AST analysis and high-latency LLM calls scale independently.
+              </p>
+            </div>
           </div>
         )}
 

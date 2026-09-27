@@ -145,3 +145,59 @@ sequenceDiagram
 | **Monolith (Node/Express + React)** | Microservices (Separating evaluation worker into Python Celery) | For a clean 2-day build, a monolith removes networking latency, RPC serialization overhead, and multi-container deployment friction. |
 | **Hybrid Evaluation (Deterministic + LLM)** | Pure LLM Prompts | Pure LLM prompts suffer from latency, hallucinated class citations, and cost. Deterministic parsing grounds the critique with verifiable evidence tags (e.g. `MegaGodParkingLotManager`). |
 | **Graceful Partial Fallback** | Blocking on LLM or failing the entire attempt | If the LLM provider experiences 503s or timeouts, the learner still immediately receives their structural score and feedback rather than a stalled UI. |
+
+---
+
+## 5. The Two Simple Change Tests (Evolution Scenarios)
+
+### Change Test A: Moving from Text Submissions to Class Diagrams
+> *Scenario: Today the learner submits text. Later the platform supports a visual class diagram or diagram DSL (PlantUML/Mermaid). How much of the domain model changes?*
+
+**Impact on Domain Model: ZERO.**
+- The `Submission` entity is intentionally designed as an abstract domain representation:
+  ```typescript
+  interface Submission {
+    designBlocks: DesignBlock[];      // Entities, fields, methods
+    relationships: Relationship[];    // Associations, inheritance, composition
+    rationaleText: string;
+  }
+  ```
+- Whether the input arrives as:
+  1. Structured Markdown text (current MVP)
+  2. PlantUML / Mermaid DSL script
+  3. Interactive canvas node-graph JSON
+- The translation occurs solely in the `SubmissionParserService` (or a new `DiagramParserService`). Once parsed into `DesignBlock[]` and `Relationship[]`, the core domain models (`Attempt`, `Problem`), the evaluators (`DeterministicEvaluator`, `LLMEvaluator`), the queue, and the feedback screens remain **100% untouched**.
+
+### Change Test B: Adding New Evaluators (Rule-based Linters or Human Review)
+> *Scenario: Today feedback comes from a hybrid evaluator. Later you add a static AST linter, rule-based checker, or human mentor review. Can you add it without rewriting the practice flow?*
+
+**Impact on Practice Flow: ZERO.**
+- The **Strategy Pattern** abstracts evaluation behind `IEvaluator`:
+  ```typescript
+  interface IEvaluator {
+    evaluate(submission: Submission, problem: Problem): Promise<EvaluationResult>;
+  }
+  ```
+- To introduce a human review step or an additional linter:
+  1. Implement `HumanReviewEvaluator implements IEvaluator`.
+  2. Plug it into `CompositeEvaluator` (or execute it asynchronously when human review completes).
+  3. `AttemptController`, `EvaluationQueue`, database persistence, and UI rendering consume the standardized `EvaluationResult` with `CriterionScore[]` without modifying a single line of orchestration code.
+
+---
+
+## 6. Practical Scaling & Future Component Decoupling
+
+In accordance with practical engineering judgment:
+
+1. **Non-blocking Async Submission**:
+   - Submissions move `Submitted` $\rightarrow$ `Evaluating` $\rightarrow$ `Evaluated`.
+   - The learner's work is persisted immediately to disk/database *before* evaluation is enqueued, ensuring zero data loss if an evaluation engine crashes.
+
+2. **Idempotency & Duplicate Prevention**:
+   - Rapid double-clicks or repeated submissions with identical content hash are deduplicated before enqueuing.
+
+3. **What Component to Separate First When Growing?**
+   - **The `EvaluationQueue` Worker**.
+   - *Why*: Web server endpoints (`/api/problems`, `/api/attempts`) are lightweight I/O operations requiring fast <50ms response times. In contrast, LLM calls take 2–8 seconds and AST parsing consumes CPU.
+   - *Decoupling plan*: Replace the in-process queue with Redis BullMQ or AWS SQS, moving `CompositeEvaluator` into a horizontally scalable background worker (e.g. AWS Lambda or Cloud Run worker). The core web API remains thin, fast, and resilient.
+
