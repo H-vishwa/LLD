@@ -4,10 +4,9 @@ import path from 'path';
 
 export default defineConfig({
   plugins: [react()],
-  root: 'src/client',
   resolve: {
     alias: {
-      '@': path.resolve(process.cwd(), './src'),
+      '@': path.resolve(__dirname, './src'),
     },
   },
   server: {
@@ -20,7 +19,7 @@ export default defineConfig({
     },
   },
   build: {
-    outDir: '../../dist/client',
+    outDir: 'dist',
     emptyOutDir: true,
   },
 });

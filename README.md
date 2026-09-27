@@ -16,72 +16,46 @@ The project is structured according to strict Clean Architecture and Object-Orie
 │   ├── DESIGN_NOTE.md                     # Domain model, architecture, trade-offs (25% weight)
 │   └── AI_USAGE.md                        # AI decision audit log (5% weight)
 │
-├── src/
-│   ├── domain/                            # Core Domain Layer (Pure Modern JavaScript, Zero Frameworks)
-│   │   ├── models/
-│   │   │   ├── problem.model.js           # Problem entity & extensibility hooks
-│   │   │   ├── submission.model.js        # DesignBlock, Relationship, Submission value objects
-│   │   │   ├── attempt.model.js           # Attempt lifecycle & delta calculation
-│   │   │   └── evaluation.model.js        # CriterionScore, EvaluationResult
-│   │   ├── repositories/                  # Repository Pattern Base Classes
-│   │   │   ├── problem.repository.interface.js
-│   │   │   ├── attempt.repository.interface.js
-│   │   │   └── evaluation.repository.interface.js
-│   │   └── services/
-│   │       ├── submission-parser.service.js # Resilient Markdown & code block parser
-│   │       └── rubric.service.js          # 5 weighted evaluation dimensions
-│   │
-│   ├── evaluators/                        # Strategy Pattern Implementation
-│   │   ├── evaluator.interface.js         # IEvaluator base contract
-│   │   ├── deterministic.evaluator.js     # Structural checks (God class, SRP, associations)
-│   │   ├── llm.evaluator.js               # Semantic reasoning & extensibility evaluation
-│   │   └── composite.evaluator.js         # Template Method: coordinates multi-stage evaluation
-│   │
-│   ├── prompts/
-│   │   └── llm-evaluator.prompt.js        # Reviewable LLM prompt with strict JSON schema
-│   │
-│   ├── data/                              # Data Persistence Layer
-│   │   ├── seed-problems.js               # 3 Seed Problems (Parking Lot, Elevator, Vending)
-│   │   ├── in-memory-problem.repository.js
-│   │   ├── in-memory-attempt.repository.js
-│   │   └── in-memory-evaluation.repository.js
-│   │
-│   ├── queue/                             # Asynchronous Job Execution
-│   │   └── evaluation-queue.js            # Non-blocking async queue with retry & fallback
-│   │
-│   ├── server/                            # Backend API (Express)
-│   │   ├── controllers/
-│   │   │   ├── problem.controller.js
-│   │   │   └── attempt.controller.js
-│   │   ├── app.js                         # Express setup with Dependency Injection
-│   │   └── server.js                      # Server entry point
-│   │
-│   └── client/                            # Modern Frontend (React + Vite + Vanilla CSS)
-│       ├── index.html                     # Outfit & JetBrains Mono typography
-│       ├── App.css                        # Glassmorphic dark design system
-│       ├── App.jsx                        # Root orchestrator
-│       ├── main.jsx                       # React mounting entrypoint
-│       ├── components/
-│       │   ├── Navbar.jsx
-│       │   ├── ProblemList.jsx            # Problem directory & difficulty badges
-│       │   ├── ProblemDetail.jsx          # Requirements, constraints, extensibility prompt
-│       │   ├── SubmissionForm.jsx         # Monospace editor with live parse inspector
-│       │   ├── FeedbackView.jsx           # Criterion score cards, evidence badges, ring score
-│       │   ├── AttemptHistory.jsx         # Score progression timeline
-│       │   ├── AttemptDeltaModal.jsx      # Side-by-side iteration delta comparison
-│       │   └── DocsView.jsx               # In-app architecture and research viewer
-│       └── services/
-│           └── api.service.js             # Client API interface
+├── server/                                # Dedicated Backend (Node.js + Express)
+│   ├── src/
+│   │   ├── domain/                        # Core Domain Layer (Models, Repositories, Services)
+│   │   │   ├── models/                    # Problem, Submission, Attempt, Evaluation entities
+│   │   │   ├── repositories/              # Repository interfaces
+│   │   │   └── services/                  # SubmissionParser & Rubric services
+│   │   ├── evaluators/                    # Strategy pattern evaluators (Deterministic, LLM, Composite)
+│   │   ├── prompts/                       # LLM prompt schemas
+│   │   ├── data/                          # In-memory repositories & seed problems
+│   │   ├── queue/                         # Async non-blocking evaluation queue
+│   │   ├── controllers/                   # Problem & Attempt controllers
+│   │   ├── app.js                         # Express factory & IoC container
+│   │   └── server.js                      # Server listener entry point
+│   ├── tests/                             # Server Vitest test suite
+│   ├── package.json                       # Server package specification
+│   └── vitest.config.js                   # Server test configuration
 │
-├── tests/                                 # Automated Test Suite (Vitest)
-│   ├── submission-parser.test.js          # Block, member, relationship, & empty input parsing
-│   ├── deterministic.evaluator.test.js    # God-class penalties & modularity rewards
-│   ├── composite.evaluator.test.js        # Multi-stage evaluation & partial timeout fallback
-│   └── evaluation-queue.test.js           # Async state lifecycle: Submitted -> Evaluating -> Evaluated
+├── client/                                # Dedicated Frontend (React + Vite + Tailwind CSS)
+│   ├── src/
+│   │   ├── components/                    # Modern Tailwind CSS components
+│   │   │   ├── Navbar.jsx
+│   │   │   ├── ProblemList.jsx            # Challenges directory & difficulty badges
+│   │   │   ├── ProblemDetail.jsx          # Requirements & Extensibility hook
+│   │   │   ├── SubmissionForm.jsx         # Code editor & structural inspector
+│   │   │   ├── FeedbackView.jsx           # Score breakdown & qualitative analysis
+│   │   │   ├── AttemptHistory.jsx         # Attempt progression cards
+│   │   │   ├── AttemptDeltaModal.jsx      # Side-by-side retry delta modal
+│   │   │   └── DocsView.jsx               # In-app architecture & research docs
+│   │   ├── services/                      # Axios/Fetch API client
+│   │   ├── data/                          # Interactive worked examples
+│   │   ├── App.jsx                        # Root React component
+│   │   ├── index.css                      # Tailwind CSS design system & utilities
+│   │   └── main.jsx                       # React DOM mounting
+│   ├── index.html                         # Entry HTML with Outfit & Inter typography
+│   ├── tailwind.config.js                 # Tailwind CSS configuration
+│   ├── postcss.config.js                  # PostCSS configuration
+│   ├── vite.config.js                     # Vite build and proxy configuration
+│   └── package.json                       # Client package specification
 │
-├── package.json
-├── vite.config.js
-└── vitest.config.js
+└── package.json                           # Root workspace orchestrator
 ```
 
 ---

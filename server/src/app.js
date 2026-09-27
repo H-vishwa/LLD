@@ -1,16 +1,21 @@
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
-import { InMemoryProblemRepository } from '../data/in-memory-problem.repository.js';
-import { InMemoryAttemptRepository } from '../data/in-memory-attempt.repository.js';
-import { InMemoryEvaluationRepository } from '../data/in-memory-evaluation.repository.js';
-import { DeterministicEvaluator } from '../evaluators/deterministic.evaluator.js';
-import { LLMEvaluator } from '../evaluators/llm.evaluator.js';
-import { CompositeEvaluator } from '../evaluators/composite.evaluator.js';
-import { SubmissionParserService } from '../domain/services/submission-parser.service.js';
-import { EvaluationQueue } from '../queue/evaluation-queue.js';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
+import { InMemoryProblemRepository } from './data/in-memory-problem.repository.js';
+import { InMemoryAttemptRepository } from './data/in-memory-attempt.repository.js';
+import { InMemoryEvaluationRepository } from './data/in-memory-evaluation.repository.js';
+import { DeterministicEvaluator } from './evaluators/deterministic.evaluator.js';
+import { LLMEvaluator } from './evaluators/llm.evaluator.js';
+import { CompositeEvaluator } from './evaluators/composite.evaluator.js';
+import { SubmissionParserService } from './domain/services/submission-parser.service.js';
+import { EvaluationQueue } from './queue/evaluation-queue.js';
 import { ProblemController } from './controllers/problem.controller.js';
 import { AttemptController } from './controllers/attempt.controller.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export function createApp() {
   const app = express();
@@ -59,7 +64,13 @@ export function createApp() {
   app.post('/api/parse/preview', attemptController.previewParse);
 
   // Serve static client bundle if built
-  const clientDist = path.resolve(process.cwd(), 'dist/client');
+  const clientDistPaths = [
+    path.resolve(__dirname, '../../client/dist'),
+    path.resolve(process.cwd(), 'client/dist'),
+    path.resolve(process.cwd(), 'dist/client'),
+  ];
+  const clientDist = clientDistPaths.find((p) => fs.existsSync(p)) || clientDistPaths[0];
+
   app.use(express.static(clientDist));
   app.get('*', (req, res, next) => {
     if (req.path.startsWith('/api')) return next();

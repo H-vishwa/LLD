@@ -3,15 +3,19 @@
   "version": "1.0.0",
   "description": "A production-grade LLD practice platform with hybrid deterministic & LLM evaluation (JavaScript)",
   "type": "module",
+  "workspaces": [
+    "client",
+    "server"
+  ],
   "scripts": {
-    "dev:server": "node --watch src/server/server.js",
-    "dev:client": "vite",
+    "dev:server": "npm --prefix server run dev",
+    "dev:client": "npm --prefix client run dev",
     "dev": "concurrently -n \"API,WEB\" -c \"cyan,magenta\" \"npm run dev:server\" \"npm run dev:client\"",
-    "build:client": "vite build",
+    "build:client": "npm --prefix client run build",
     "build": "npm run build:client",
-    "start": "node src/server/server.js",
-    "test": "vitest run --config vitest.config.js",
-    "test:watch": "vitest --config vitest.config.js"
+    "start": "npm --prefix server run start",
+    "test": "npm --prefix server run test",
+    "test:watch": "npm --prefix server run test:watch"
   },
   "dependencies": {
     "cors": "^2.8.5",
@@ -24,7 +28,10 @@
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.4",
+    "autoprefixer": "^10.4.20",
     "concurrently": "^9.1.2",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.17",
     "vite": "^5.4.14",
     "vitest": "^2.1.8"
   }

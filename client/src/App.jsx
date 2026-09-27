@@ -8,7 +8,7 @@ import { FeedbackView } from './components/FeedbackView.jsx';
 import { AttemptHistory } from './components/AttemptHistory.jsx';
 import { AttemptDeltaModal } from './components/AttemptDeltaModal.jsx';
 import { DocsView } from './components/DocsView.jsx';
-import './App.css';
+import { AlertCircle, X } from 'lucide-react';
 
 export const App = () => {
   const [view, setView] = useState('problems');
@@ -26,6 +26,7 @@ export const App = () => {
   const [delta, setDelta] = useState(null);
   const [showDeltaModal, setShowDeltaModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(null);
 
   useEffect(() => {
     loadProblems();
@@ -38,6 +39,7 @@ export const App = () => {
       setProblems(data);
     } catch (err) {
       console.error('Failed to load problems:', err);
+      setErrorMessage(`Failed to load problems: ${err.message}`);
     } finally {
       setLoadingProblems(false);
     }
@@ -76,7 +78,7 @@ export const App = () => {
 
       pollAttempt(newAttempt.id);
     } catch (err) {
-      alert(`Submission error: ${err.message}`);
+      setErrorMessage(`Submission error: ${err.message}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -120,6 +122,7 @@ export const App = () => {
       setView('feedback');
     } catch (err) {
       console.error('Failed to inspect attempt:', err);
+      setErrorMessage(`Failed to load attempt: ${err.message}`);
     }
   };
 
@@ -130,19 +133,33 @@ export const App = () => {
       setDelta(deltaData);
       setShowDeltaModal(true);
     } catch (err) {
-      alert(`Delta error: ${err.message}`);
+      setErrorMessage(`Delta comparison error: ${err.message}`);
     }
   };
 
   return (
-    <div className="app-container">
+    <div className="min-h-screen bg-[#090d16] text-slate-100 flex flex-col">
       <Navbar
         onGoHome={() => setView('problems')}
         onOpenDocs={() => setView('docs')}
         activeView={view}
       />
 
-      <main className="main-layout">
+      {/* Floating Error Notification Toast */}
+      {errorMessage && (
+        <div className="fixed bottom-6 right-6 z-50 max-w-md bg-rose-950/90 border border-rose-500/30 text-rose-200 p-4 rounded-xl shadow-2xl backdrop-blur-md flex items-start gap-3 animate-in slide-in-from-bottom duration-200">
+          <AlertCircle size={20} className="text-rose-400 shrink-0 mt-0.5" />
+          <div className="text-xs leading-relaxed flex-1">{errorMessage}</div>
+          <button
+            onClick={() => setErrorMessage(null)}
+            className="p-1 text-rose-400 hover:text-white rounded transition-colors"
+          >
+            <X size={15} />
+          </button>
+        </div>
+      )}
+
+      <main className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 flex-1">
         {view === 'problems' && (
           <ProblemList
             problems={problems}
@@ -152,26 +169,29 @@ export const App = () => {
         )}
 
         {view === 'workspace' && selectedProblem && (
-          <div>
-            <div style={{ marginBottom: '1.25rem' }}>
+          <div className="space-y-6">
+            <div>
               <button
-                className="btn btn-secondary"
+                className="btn-secondary-tw text-xs"
                 onClick={() => setView('problems')}
-                style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem' }}
               >
                 ← Back to Challenges
               </button>
             </div>
 
-            <div className="workspace-grid">
-              <ProblemDetail problem={selectedProblem} />
-              <SubmissionForm
-                problem={selectedProblem}
-                previousAttemptId={previousAttemptId}
-                previousContent={previousContent}
-                onSubmit={handleSubmit}
-                isSubmitting={isSubmitting}
-              />
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+              <div className="lg:col-span-5">
+                <ProblemDetail problem={selectedProblem} />
+              </div>
+              <div className="lg:col-span-7">
+                <SubmissionForm
+                  problem={selectedProblem}
+                  previousAttemptId={previousAttemptId}
+                  previousContent={previousContent}
+                  onSubmit={handleSubmit}
+                  isSubmitting={isSubmitting}
+                />
+              </div>
             </div>
 
             <AttemptHistory
@@ -182,7 +202,7 @@ export const App = () => {
         )}
 
         {view === 'feedback' && currentAttempt && (
-          <div>
+          <div className="space-y-8">
             <FeedbackView
               attempt={currentAttempt}
               evaluation={currentEvaluation}
