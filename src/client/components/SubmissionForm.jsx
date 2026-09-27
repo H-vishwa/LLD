@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../services/api.service.js';
 import { Play, RotateCcw, AlertTriangle, Layers, GitCommit, FileText } from 'lucide-react';
+import { WORKED_EXAMPLES } from '../../data/worked-examples.js';
 
 export const SubmissionForm = ({
   problem,
@@ -34,9 +35,19 @@ export const SubmissionForm = ({
   }, [content]);
 
   const handleResetTemplate = () => {
-    if (window.confirm('Reset editor to problem starter template? Your current changes will be overwritten.')) {
+    if (window.confirm('Reset editor to problem starter template?')) {
       setContent(problem.starterTemplate);
     }
+  };
+
+  const handleLoadStrong = () => {
+    const example = WORKED_EXAMPLES[problem.id]?.strong;
+    if (example) setContent(example);
+  };
+
+  const handleLoadAntiPattern = () => {
+    const example = WORKED_EXAMPLES[problem.id]?.antiPattern;
+    if (example) setContent(example);
   };
 
   const handleSubmit = async (e) => {
@@ -64,14 +75,34 @@ export const SubmissionForm = ({
           )}
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={handleLoadStrong}
+            title="Load an architecturally sound solution with Strategy/State patterns and OCP extensibility"
+            style={{ padding: '0.35rem 0.65rem', fontSize: '0.75rem', color: '#34d399', borderColor: 'rgba(16, 185, 129, 0.3)' }}
+          >
+            ⭐ Load Strong
+          </button>
+
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={handleLoadAntiPattern}
+            title="Load a bloated God class anti-pattern to test smell detection"
+            style={{ padding: '0.35rem 0.65rem', fontSize: '0.75rem', color: '#fb7185', borderColor: 'rgba(244, 63, 94, 0.3)' }}
+          >
+            ⚠️ Load God Object
+          </button>
+
           <button
             type="button"
             className="btn btn-secondary"
             onClick={handleResetTemplate}
-            style={{ padding: '0.35rem 0.75rem', fontSize: '0.78rem' }}
+            style={{ padding: '0.35rem 0.65rem', fontSize: '0.75rem' }}
           >
-            <RotateCcw size={13} /> Reset Template
+            <RotateCcw size={12} /> Reset
           </button>
 
           <button
@@ -79,9 +110,9 @@ export const SubmissionForm = ({
             className="btn btn-primary"
             onClick={handleSubmit}
             disabled={isSubmitting || !content.trim()}
-            style={{ padding: '0.45rem 1.1rem', fontSize: '0.82rem' }}
+            style={{ padding: '0.45rem 1rem', fontSize: '0.82rem' }}
           >
-            <Play size={14} fill="currentColor" />
+            <Play size={13} fill="currentColor" />
             {isSubmitting ? 'Evaluating...' : 'Submit Design'}
           </button>
         </div>

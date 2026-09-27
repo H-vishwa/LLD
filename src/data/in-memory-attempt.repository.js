@@ -1,9 +1,13 @@
 import { IAttemptRepository } from '../domain/repositories/attempt.repository.interface.js';
+import { PRESEEDED_ATTEMPTS } from './seed-attempts.js';
 
 export class InMemoryAttemptRepository extends IAttemptRepository {
-  constructor() {
+  constructor(initialAttempts = PRESEEDED_ATTEMPTS) {
     super();
     this.attempts = new Map();
+    for (const att of initialAttempts) {
+      this.attempts.set(att.id, { ...att });
+    }
   }
 
   async create(attempt) {

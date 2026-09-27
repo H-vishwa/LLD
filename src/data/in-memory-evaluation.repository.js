@@ -1,10 +1,15 @@
 import { IEvaluationRepository } from '../domain/repositories/evaluation.repository.interface.js';
+import { PRESEEDED_EVALUATIONS } from './seed-attempts.js';
 
 export class InMemoryEvaluationRepository extends IEvaluationRepository {
-  constructor() {
+  constructor(initialEvaluations = PRESEEDED_EVALUATIONS) {
     super();
     this.results = new Map();
     this.attemptToResultId = new Map();
+    for (const ev of initialEvaluations) {
+      this.results.set(ev.id, { ...ev });
+      this.attemptToResultId.set(ev.attemptId, ev.id);
+    }
   }
 
   async save(result) {

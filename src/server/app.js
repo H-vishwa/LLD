@@ -51,11 +51,11 @@ export function createApp() {
   app.get('/api/problems', problemController.getAll);
   app.get('/api/problems/:id', problemController.getById);
 
-  // Attempt routes
+  // Attempt routes (specific routes before wildcard :id)
   app.post('/api/attempts', attemptController.create);
-  app.get('/api/attempts/:id', attemptController.getById);
   app.get('/api/attempts/history', attemptController.getHistory);
   app.get('/api/attempts/:id/delta', attemptController.getDelta);
+  app.get('/api/attempts/:id', attemptController.getById);
   app.post('/api/parse/preview', attemptController.previewParse);
 
   // Serve static client bundle if built
