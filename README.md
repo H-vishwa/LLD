@@ -17,72 +17,71 @@ The project is structured according to strict Clean Architecture and Object-Orie
 │   └── AI_USAGE.md                        # AI decision audit log (5% weight)
 │
 ├── src/
-│   ├── domain/                            # Core Domain Layer (Pure TypeScript, Zero Frameworks)
+│   ├── domain/                            # Core Domain Layer (Pure Modern JavaScript, Zero Frameworks)
 │   │   ├── models/
-│   │   │   ├── problem.model.ts           # Problem entity & extensibility hooks
-│   │   │   ├── submission.model.ts        # DesignBlock, Relationship, Submission value objects
-│   │   │   ├── attempt.model.ts           # Attempt lifecycle & delta calculation
-│   │   │   └── evaluation.model.ts        # CriterionScore, EvaluationResult
-│   │   ├── repositories/                  # Repository Pattern Interfaces
-│   │   │   ├── problem.repository.interface.ts
-│   │   │   ├── attempt.repository.interface.ts
-│   │   │   └── evaluation.repository.interface.ts
+│   │   │   ├── problem.model.js           # Problem entity & extensibility hooks
+│   │   │   ├── submission.model.js        # DesignBlock, Relationship, Submission value objects
+│   │   │   ├── attempt.model.js           # Attempt lifecycle & delta calculation
+│   │   │   └── evaluation.model.js        # CriterionScore, EvaluationResult
+│   │   ├── repositories/                  # Repository Pattern Base Classes
+│   │   │   ├── problem.repository.interface.js
+│   │   │   ├── attempt.repository.interface.js
+│   │   │   └── evaluation.repository.interface.js
 │   │   └── services/
-│   │       ├── submission-parser.service.ts # Resilient Markdown & code block parser
-│   │       └── rubric.service.ts          # 5 weighted evaluation dimensions
+│   │       ├── submission-parser.service.js # Resilient Markdown & code block parser
+│   │       └── rubric.service.js          # 5 weighted evaluation dimensions
 │   │
 │   ├── evaluators/                        # Strategy Pattern Implementation
-│   │   ├── evaluator.interface.ts         # IEvaluator contract
-│   │   ├── deterministic.evaluator.ts     # Structural checks (God class, SRP, associations)
-│   │   ├── llm.evaluator.ts               # Semantic reasoning & extensibility evaluation
-│   │   └── composite.evaluator.ts         # Template Method: coordinates multi-stage evaluation
+│   │   ├── evaluator.interface.js         # IEvaluator base contract
+│   │   ├── deterministic.evaluator.js     # Structural checks (God class, SRP, associations)
+│   │   ├── llm.evaluator.js               # Semantic reasoning & extensibility evaluation
+│   │   └── composite.evaluator.js         # Template Method: coordinates multi-stage evaluation
 │   │
 │   ├── prompts/
-│   │   └── llm-evaluator.prompt.ts        # Reviewable LLM prompt with strict JSON schema
+│   │   └── llm-evaluator.prompt.js        # Reviewable LLM prompt with strict JSON schema
 │   │
 │   ├── data/                              # Data Persistence Layer
-│   │   ├── seed-problems.ts               # 3 Seed Problems (Parking Lot, Elevator, Vending)
-│   │   ├── in-memory-problem.repository.ts
-│   │   ├── in-memory-attempt.repository.ts
-│   │   └── in-memory-evaluation.repository.ts
+│   │   ├── seed-problems.js               # 3 Seed Problems (Parking Lot, Elevator, Vending)
+│   │   ├── in-memory-problem.repository.js
+│   │   ├── in-memory-attempt.repository.js
+│   │   └── in-memory-evaluation.repository.js
 │   │
 │   ├── queue/                             # Asynchronous Job Execution
-│   │   └── evaluation-queue.ts            # Non-blocking async queue with retry & fallback
+│   │   └── evaluation-queue.js            # Non-blocking async queue with retry & fallback
 │   │
 │   ├── server/                            # Backend API (Express)
 │   │   ├── controllers/
-│   │   │   ├── problem.controller.ts
-│   │   │   └── attempt.controller.ts
-│   │   ├── app.ts                         # Express setup with Dependency Injection
-│   │   └── server.ts                      # Server entry point
+│   │   │   ├── problem.controller.js
+│   │   │   └── attempt.controller.js
+│   │   ├── app.js                         # Express setup with Dependency Injection
+│   │   └── server.js                      # Server entry point
 │   │
 │   └── client/                            # Modern Frontend (React + Vite + Vanilla CSS)
 │       ├── index.html                     # Outfit & JetBrains Mono typography
 │       ├── App.css                        # Glassmorphic dark design system
-│       ├── App.tsx                        # Root orchestrator
+│       ├── App.jsx                        # Root orchestrator
+│       ├── main.jsx                       # React mounting entrypoint
 │       ├── components/
-│       │   ├── Navbar.tsx
-│       │   ├── ProblemList.tsx            # Problem directory & difficulty badges
-│       │   ├── ProblemDetail.tsx          # Requirements, constraints, extensibility prompt
-│       │   ├── SubmissionForm.tsx         # Monospace editor with live parse inspector
-│       │   ├── FeedbackView.tsx           # Criterion score cards, evidence badges, ring score
-│       │   ├── AttemptHistory.tsx         # Score progression timeline
-│       │   ├── AttemptDeltaModal.tsx      # Side-by-side iteration delta comparison
-│       │   └── DocsView.tsx               # In-app architecture and research viewer
+│       │   ├── Navbar.jsx
+│       │   ├── ProblemList.jsx            # Problem directory & difficulty badges
+│       │   ├── ProblemDetail.jsx          # Requirements, constraints, extensibility prompt
+│       │   ├── SubmissionForm.jsx         # Monospace editor with live parse inspector
+│       │   ├── FeedbackView.jsx           # Criterion score cards, evidence badges, ring score
+│       │   ├── AttemptHistory.jsx         # Score progression timeline
+│       │   ├── AttemptDeltaModal.jsx      # Side-by-side iteration delta comparison
+│       │   └── DocsView.jsx               # In-app architecture and research viewer
 │       └── services/
-│           └── api.service.ts             # Typed client API interface
+│           └── api.service.js             # Client API interface
 │
 ├── tests/                                 # Automated Test Suite (Vitest)
-│   ├── submission-parser.test.ts          # Block, member, relationship, & empty input parsing
-│   ├── deterministic.evaluator.test.ts    # God-class penalties & modularity rewards
-│   ├── composite.evaluator.test.ts        # Multi-stage evaluation & partial timeout fallback
-│   └── evaluation-queue.test.ts           # Async state lifecycle: Submitted -> Evaluating -> Evaluated
+│   ├── submission-parser.test.js          # Block, member, relationship, & empty input parsing
+│   ├── deterministic.evaluator.test.js    # God-class penalties & modularity rewards
+│   ├── composite.evaluator.test.js        # Multi-stage evaluation & partial timeout fallback
+│   └── evaluation-queue.test.js           # Async state lifecycle: Submitted -> Evaluating -> Evaluated
 │
 ├── package.json
-├── tsconfig.json
-├── tsconfig.server.json
-├── vite.config.ts
-└── vitest.config.ts
+├── vite.config.js
+└── vitest.config.js
 ```
 
 ---
